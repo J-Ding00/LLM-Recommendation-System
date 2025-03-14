@@ -1,0 +1,40 @@
+# General
+.DS_Store
+.vscode/
+.idea/
+test.py
+
+# Python
+__pycache__/
+venv/
+*.pyc
+*.pyo
+.env
+
+# Java
+target/
+*.class
+*.jar
+*.war
+
+# Node.js (React)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+*.env
+
+# Databases & Logs
+*.sqlite
+*.log
+*.db
+*.csv
+*.tsv
+
+# Docker
+docker-compose.override.yml
+
+# AWS & Credentials
+*.pem
+.aws/
+.env
