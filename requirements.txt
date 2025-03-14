@@ -1,0 +1,6 @@
+openai
+python-dotenv
+pypdf
+tiktoken
+pandas
+numpy
