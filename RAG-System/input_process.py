@@ -123,7 +123,7 @@ def batch_embed_upsert(text_chunks, file_name='', chunk_token_size=300, max_inpu
         
         index.upsert(upsert_data, namespace=pinecone_index_namespace)
 
-def process_pdf(pdf_path, chunk_size, overlap, max_chunk_len, pinecone_index='llm-recommendation-system', pinecone_index_namespace='', reserve_data=False):
+def process_pdf(pdf_path, chunk_size, overlap, max_chunk_len, pinecone_index='llm-recommendation-system', pinecone_index_namespace=''):
     pdf_text = extract_text_from_pdf(pdf_path)
     text_chunks = split_text_with_overlap(pdf_text, max_tokens=chunk_size, overlap=overlap)[:max_chunk_len]
     batch_embed_upsert(text_chunks=text_chunks, file_name=pdf_path, chunk_token_size=chunk_size, pinecone_index=pinecone_index, pinecone_index_namespace=pinecone_index_namespace)
