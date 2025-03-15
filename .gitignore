@@ -2,7 +2,7 @@
 .DS_Store
 .vscode/
 .idea/
-test.py
+test/
 
 # Python
 __pycache__/
