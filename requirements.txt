@@ -4,3 +4,4 @@ pypdf
 tiktoken
 pandas
 numpy
+pinecone
