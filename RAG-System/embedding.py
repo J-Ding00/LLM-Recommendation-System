@@ -14,11 +14,13 @@ def get_openai_client():
         client = OpenAI(api_key=api_key)  # Create the client only once
     return client
 
-def get_embedding(text):
+# improve: generator
+def get_embedding(text_chunks):
     """Generate an embedding for a given text."""
     client = get_openai_client()
+    
     response = client.embeddings.create(
-        input=text,
+        input=text_chunks,
         model="text-embedding-3-small"
     )
     # return response

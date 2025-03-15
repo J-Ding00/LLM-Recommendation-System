@@ -1,4 +1,4 @@
-# import input_process
+import input_process
 # import embedding
 
 # def process_pdf_and_generate_embeddings(pdf_path):
@@ -12,32 +12,33 @@
 #     print(f"Generated {len(embeddings)} embeddings")
 
 #     return embeddings
+openai_client, pinecone_client, pinecone_index = None, None, None
+if __name__ == "__main__":
+    pdf_path = "test/sample.pdf"
+    
+    input_process.process_pdf(pdf_path=pdf_path, chunk_size=30, overlap=5, max_chunk_len=3)
 
-# if __name__ == "__main__":
-#     pdf_path = "test/sample.pdf"
-#     process_pdf_and_generate_embeddings(pdf_path)
+# import embedding
+# import input_process
+# import pandas as pd
 
-import embedding
-import input_process
-import pandas as pd
+# # response = embedding.get_embedding("Your text string goes here")
+# # print(response)
 
-# response = embedding.get_embedding("Your text string goes here")
-# print(response)
+# # Example usage
+# pdf_text = input_process.extract_text_from_pdf("test/sample.pdf")
+# # print(pdf_text[:200])  # Print first 500 characters to verify
 
-# Example usage
-pdf_text = input_process.extract_text_from_pdf("test/sample.pdf")
-# print(pdf_text[:200])  # Print first 500 characters to verify
+# # Example Usage
+# text_chunks = input_process.split_text_with_overlap(pdf_text)
+# print(f"Generated {len(text_chunks)} chunks with boundary buffers")
+# print(text_chunks)
 
-# Example Usage
-text_chunks = input_process.split_text_with_overlap(pdf_text)
-print(f"Generated {len(text_chunks)} chunks with boundary buffers")
-print(text_chunks)
+# embeddings = [embedding.get_embedding(chunk) for chunk in text_chunks]
+# print(f"Generated {len(embeddings)} embeddings")
 
-embeddings = [embedding.get_embedding(chunk) for chunk in text_chunks]
-print(f"Generated {len(embeddings)} embeddings")
-
-# Save the data
-input_process.save_to_csv(text_chunks, embeddings, 'test/test_csv')
+# # Save the data
+# input_process.save_to_csv(text_chunks, embeddings, 'test/test_csv')
 
 # import numpy as np
 
@@ -67,3 +68,4 @@ input_process.save_to_csv(text_chunks, embeddings, 'test/test_csv')
 # query = "What are some upcoming music festivals?"
 # top_chunks = get_top_k_chunks(query)
 # print("Most relevant paragraphs:", top_chunks)
+
