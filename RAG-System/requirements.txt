@@ -6,3 +6,4 @@ pandas
 numpy
 pinecone
 pinecone[grpc]
+pyyaml

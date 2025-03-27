@@ -1,0 +1,30 @@
+# Embedding
+embedding:
+  tokenizer: o200k_base
+  chunk_size: 300
+  chunk_overlap: 50
+  max_chunk_len: 300
+  # refer embedding model
+  max_input_token: 8192
+
+# Pinecone
+pinecone:
+  index_name: llm-recommendation-system
+  namespace: pdf
+  dimension: 1536
+  metric: cosine
+  top_k: 3
+
+# LLM (OpenAI)
+openai:
+  embedding_model: text-embedding-3-small
+  chat_model: gpt-4o
+  temperature: 0.3
+
+# Reranker (Cohere)
+# cohere:
+#   api_key: "YOUR_COHERE_API_KEY"
+#   model: rerank-english-v2.0
+#   top_k: 3
+
+# Input/output

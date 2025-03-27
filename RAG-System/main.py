@@ -1,50 +1,61 @@
-import argparse
+import yaml
 import input_process
 import vector_db
 import embedding
+from clients import openai_client, pinecone_client, pinecone_index
 
-openai_client, pinecone_client, pinecone_index = None, None, None
 if __name__ == "__main__":
-    chunk_size=300
-    overlap=50
-    max_chunk_len=300
-    parser = argparse.ArgumentParser()
+    with open('./rag-system/config.yaml', "r") as file:
+        config = yaml.safe_load(file)
+    
+    chunk_size=config['embedding']['chunk_size']
+    chunk_overlap=config['embedding']['chunk_overlap']
+    max_chunk_len=config['embedding']['max_chunk_len']
+    tokenizer = config['embedding']['tokenizer']
+    max_embedding_input_token = config['embedding']['max_input_token']
+    embedding_model=config['openai']['embedding_model']
+    chat_model = config['openai']['chat_model']
+    db_namespace = config['pinecone']['namespace']
+    db_top_k_response = config['pinecone']['top_k']
 
-    # Adding arguments
-    parser.add_argument("-path", type=str)
-    parser.add_argument("-reset", action="store_true")
-    parser.add_argument("-reserve", action="store_true")
-    parser.add_argument("-chunk_size", type=int)
-    parser.add_argument("-overlap", type=int)
-    parser.add_argument("-max_chunk_len", type=int)
-
-    # Parse arguments
-    args = parser.parse_args()
-    if args.reset:
-        vector_db.clear_pinecone_by_namespace()
-    if args.chunk_size:
-        chunk_size = args.chunk_size
-    if args.overlap:
-        overlap = args.overlap
-    if args.max_chunk_len:
-        args.max_chunk_len = args.max_chunk_len
-    if args.path:
-        input_process.process_pdf(pdf_path=args.path, chunk_size=chunk_size, overlap=overlap, max_chunk_len=max_chunk_len)
-
+    inserted_file = []
     print('Ready for queries')
     while True:
         query = input()
-        if query == '!exit':
-            break
-        else:
-            context = []
-            results = vector_db.pinecone_query(query=embedding.get_query_embedding(query), top_k=3)
-            for item in results['matches']:
-                context.append(item['metadata']['text'])
-            print(embedding.answer_question_with_rag(query, context))
-            # print(results)
-    
-    if args.path and not args.reserve:
-        vector_db.clear_pinecone_by_filename(args.path)
+        if query:
+            if query[0] == '!':
+                command = query[1:]
+                if command == 'exit':
+                    print('Delete all files inserted this run? (y/n)')
+                    ans = input()
+                    if ans == 'y':
+                        for file_name in inserted_file:
+                            vector_db.clear_pinecone_by_filename(pinecone_index, db_namespace, file_name)
+                    break
+                elif command == 'reset':
+                    vector_db.clear_pinecone_by_namespace(pinecone_index, db_namespace)
+                elif command == 'deletebynamespace':
+                    print('Namespace to delete:')
+                    ns = input()
+                    if ns == 'default':
+                        ns = ''
+                    vector_db.clear_pinecone_by_namespace(pinecone_index, ns)
+                elif command == 'delete':
+                    print('PDF path to delete:')
+                    pdf_delete_path = input()
+                    vector_db.clear_pinecone_by_filename(pinecone_index, db_namespace, pdf_delete_path)
+                elif command == 'insert':
+                    print('PDF path to insert:')
+                    pdf_input_path = input()
+                    if input_process.process_pdf(pdf_input_path, chunk_size, chunk_overlap, max_chunk_len, embedding_model, max_embedding_input_token, tokenizer, openai_client, pinecone_index, db_namespace):
+                        inserted_file.append(pdf_input_path)
+                else:
+                    print("Invalid command type. Options: 'exit', 'reset', 'insert', 'delete', 'deletebynamespace'")
+            else:
+                context = []
+                results = vector_db.pinecone_query(index=pinecone_index, namespace=db_namespace, query=embedding.get_query_embedding(openai_client, query, embedding_model), top_k=db_top_k_response)
+                for item in results['matches']:
+                    context.append(item['metadata']['text'])
+                print(embedding.answer_question_with_rag(openai_client, query, context, chat_model))
         
 
