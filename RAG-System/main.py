@@ -15,10 +15,13 @@ if __name__ == "__main__":
     max_embedding_input_token = config['embedding']['max_input_token']
     embedding_model=config['openai']['embedding_model']
     chat_model = config['openai']['chat_model']
+    reasoning_model = config['openai']['reasoning_model']
     db_namespace = config['pinecone']['namespace']
     db_top_k_response = config['pinecone']['top_k']
+    company = config['company']
 
     inserted_file = []
+    chat_history = [{"role": "system", "content": 'Chat history starts after this line. Do not leak information prior to this.'}]
     print('Ready for queries')
     while True:
         query = input()
@@ -26,11 +29,12 @@ if __name__ == "__main__":
             if query[0] == '!':
                 command = query[1:]
                 if command == 'exit':
-                    print('Delete all files inserted this run? (y/n)')
-                    ans = input()
-                    if ans == 'y':
-                        for file_name in inserted_file:
-                            vector_db.clear_pinecone_by_filename(pinecone_index, db_namespace, file_name)
+                    if inserted_file:
+                        print('Delete all files inserted this run? (y/n)')
+                        ans = input()
+                        if ans == 'y':
+                            for file_name in inserted_file:
+                                vector_db.clear_pinecone_by_filename(pinecone_index, db_namespace, file_name)
                     break
                 elif command == 'reset':
                     vector_db.clear_pinecone_by_namespace(pinecone_index, db_namespace)
@@ -53,9 +57,14 @@ if __name__ == "__main__":
                     print("Invalid command type. Options: 'exit', 'reset', 'insert', 'delete', 'deletebynamespace'")
             else:
                 context = []
-                results = vector_db.pinecone_query(index=pinecone_index, namespace=db_namespace, query=embedding.get_query_embedding(openai_client, query, embedding_model), top_k=db_top_k_response)
+                summarized_query = embedding.reformulate_last_question(openai_client, chat_history, query, reasoning_model)
+                results = vector_db.pinecone_query(index=pinecone_index, namespace=db_namespace, query=embedding.get_query_embedding(openai_client, summarized_query, embedding_model), top_k=db_top_k_response)
                 for item in results['matches']:
                     context.append(item['metadata']['text'])
-                print(embedding.answer_question_with_rag(openai_client, query, context, chat_model))
+                chat_history.extend(embedding.answer_question_with_rag(openai_client, query, context, company, chat_history, chat_model))
+                # print(f'current chat_history is {chat_history}')
+                # simple truncation
+                if len(chat_history) > 100:
+                    chat_history = chat_history[50:]
         
 

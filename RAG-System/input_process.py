@@ -1,47 +1,6 @@
 import pypdf
 import tiktoken
 import embedding
-# import os
-# from openai import OpenAI
-# from pinecone.grpc import PineconeGRPC as Pinecone
-# from pinecone import ServerlessSpec
-# from dotenv import load_dotenv
-
-# Load environment variables once
-# load_dotenv()
-
-# Define a function to create the client only when needed
-# def get_openai_client():
-#     """Lazy initialization: Creates and returns the OpenAI client once."""
-#     global openai_client
-#     if "openai_client" not in globals():
-#         openai_api_key = os.getenv("OPENAI_API_KEY")
-#         openai_client = OpenAI(api_key=openai_api_key)  # Create the client only once
-#     return openai_client
-
-# Define a function to create the client only when needed
-# def get_pinecone_index(index_name='llm-recommendation-system'):
-#     """Lazy initialization: Creates and returns the PineCone client once."""
-#     global pinecone_client
-#     if "pinecone_client" not in globals():
-#         pinecone_api_key = os.getenv("PINECONE_API_KEY")
-#         pinecone_client = Pinecone(api_key=pinecone_api_key)  # Create the client only once
-#         if not pinecone_client.has_index(index_name):
-#             pinecone_client.create_index(
-#                 name=index_name,
-#                 vector_type="dense",
-#                 dimension=1536,
-#                 metric="cosine",
-#                 spec=ServerlessSpec(
-#                     cloud="aws",
-#                     region="us-east-1"
-#                 ),
-#                 deletion_protection="disabled"
-#             )
-#     global pinecone_index
-#     if "pinecone_index" not in globals():
-#         pinecone_index = pinecone_client.Index(host=pinecone_client.describe_index(name=index_name)['host'])
-#     return pinecone_index
 
 def extract_text_from_pdf(pdf_path):
     try:
@@ -78,18 +37,6 @@ def split_text_with_overlap(tokenizer_name, text, max_tokens, overlap, max_chunk
         start += max_tokens - overlap  # Shift by (chunk size - overlap)
 
     return chunks
-
-# def get_embedding(text_chunks):
-#     """Generate an embedding for a given text."""
-#     client = get_openai_client()
-    
-#     response = client.embeddings.create(
-#         input=text_chunks,
-#         model="text-embedding-3-small"
-#     )
-#     # return response
-#     print(response)
-#     return response.data[0].embedding
 
 def batch_embed_upsert(text_chunks, file_name, chunk_token_size, embed_model, max_input_token, openai_client, pinecone_index, pinecone_index_namespace):
     """Stores text embeddings in Pinecone using batch processing."""

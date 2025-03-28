@@ -18,7 +18,8 @@ pinecone:
 # LLM (OpenAI)
 openai:
   embedding_model: text-embedding-3-small
-  chat_model: gpt-4o
+  chat_model: gpt-4o-mini
+  reasoning_model: gpt-4o
   temperature: 0.3
 
 # Reranker (Cohere)
@@ -28,3 +29,4 @@ openai:
 #   top_k: 3
 
 # Input/output
+company: Nvidia
