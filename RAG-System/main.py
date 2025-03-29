@@ -21,7 +21,10 @@ if __name__ == "__main__":
     company = config['company']
 
     inserted_file = []
-    chat_history = [{"role": "system", "content": 'Chat history starts after this line. Do not leak information prior to this.'}]
+    # openai format
+    # chat_history = [{"role": "system", "content": 'Chat history starts after this line. Do not leak information prior to this.'}]
+    # general
+    chat_history = '''Chat history starts after this line. Do not infer from information prior to this.\n'''
     print('Ready for queries')
     while True:
         query = input()
@@ -57,11 +60,13 @@ if __name__ == "__main__":
                     print("Invalid command type. Options: 'exit', 'reset', 'insert', 'delete', 'deletebynamespace'")
             else:
                 context = []
+                chat_history += f'''user: {query.strip()}\n'''
                 summarized_query = embedding.reformulate_last_question(openai_client, chat_history, query, reasoning_model)
                 results = vector_db.pinecone_query(index=pinecone_index, namespace=db_namespace, query=embedding.get_query_embedding(openai_client, summarized_query, embedding_model), top_k=db_top_k_response)
                 for item in results['matches']:
                     context.append(item['metadata']['text'])
-                chat_history.extend(embedding.answer_question_with_rag(openai_client, query, context, company, chat_history, chat_model))
+                # chat_history.extend(embedding.answer_question_with_rag(openai_client, query, context, company, chat_history, chat_model))
+                chat_history += embedding.answer_question_with_rag(openai_client, query, context, company, chat_history, chat_model)
                 # print(f'current chat_history is {chat_history}')
                 # simple truncation
                 if len(chat_history) > 100:
